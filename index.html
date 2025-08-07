@@ -6,14 +6,32 @@
   <title>Smart CGPA Calculator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body><script src="script.js"></script>
-
+<body>
   <div class="container">
     <h1>🎓 Smart CGPA Calculator</h1>
 
     <form id="cgpa-form">
-      <div id="course-inputs">
-        <div class="course-row">
+      <div id="course-inputs"></div>
+
+      <button type="button" id="add-course">➕ Add Course</button>
+      <button type="submit">Calculate CGPA</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const courseInputs = document.getElementById('course-inputs');
+      const addCourseBtn = document.getElementById('add-course');
+      const form = document.getElementById('cgpa-form');
+      const resultDiv = document.getElementById('result');
+
+      // Function to create a new course input row
+      function createCourseRow() {
+        const row = document.createElement('div');
+        row.className = 'course-row';
+        row.innerHTML = `
           <input type="text" placeholder="Course Code (e.g. MTH101)" class="course-code" required />
           <select class="grade" required>
             <option value="">Grade</option>
@@ -25,16 +43,42 @@
             <option value="0">F</option>
           </select>
           <input type="number" placeholder="Units" class="units" min="1" max="6" required />
-        </div>
-      </div>
+        `;
+        courseInputs.appendChild(row);
+      }
 
-      <button type="button" id="add-course">➕ Add Course</button>
-      <button type="submit">Calculate CGPA</button>
-    </form>
+      // Add first row on load
+      createCourseRow();
 
-    <div id="result"></div>
-  </div>
+      // Add new course row on button click
+      addCourseBtn.addEventListener('click', createCourseRow);
 
-  <script src="script.js"></script>
+      // Handle form submission
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const rows = document.querySelectorAll('.course-row');
+        let totalPoints = 0;
+        let totalUnits = 0;
+
+        rows.forEach((row) => {
+          const grade = parseInt(row.querySelector('.grade').value);
+          const units = parseInt(row.querySelector('.units').value);
+
+          if (!isNaN(grade) && !isNaN(units)) {
+            totalPoints += grade * units;
+            totalUnits += units;
+          }
+        });
+
+        if (totalUnits === 0) {
+          resultDiv.textContent = 'Please enter valid courses and units.';
+        } else {
+          const cgpa = (totalPoints / totalUnits).toFixed(2);
+          resultDiv.innerHTML = `<h2>Your CGPA is: ${cgpa}</h2>`;
+        }
+      });
+    });
+  </script>
 </body>
 </html>
