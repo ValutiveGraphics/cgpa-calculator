@@ -1,68 +1,120 @@
-/* style.css */
+/* Reset some default styles */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
 }
 
 body {
-  background: linear-gradient(to bottom right, #e0f7fa, #fff);
-  color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7fa;
   padding: 20px;
-  min-height: 100vh;
+  color: #333;
 }
 
 .container {
-  max-width: 600px;
+  max-width: 700px;
   margin: auto;
-  background: white;
+  background: #fff;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 24px;
-  color: #00796b;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#semester-select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 200px;
+  font-size: 16px;
 }
 
 .course-row {
   display: flex;
   gap: 10px;
-  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .course-row input,
 .course-row select {
-  padding: 10px;
+  padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  font-size: 15px;
   flex: 1;
+  min-width: 150px;
 }
 
-button {
-  margin-top: 10px;
-  padding: 12px;
-  width: 100%;
-  border: none;
-  border-radius: 6px;
-  background-color: #00796b;
+.course-row .delete-course {
+  background-color: #e74c3c;
   color: white;
-  font-size: 16px;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s;
 }
 
-button:hover {
-  background-color: #004d40;
+.course-row .delete-course:hover {
+  background-color: #c0392b;
+}
+
+button[type="submit"],
+#add-course,
+#clear-data {
+  padding: 10px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: fit-content;
+  transition: background-color 0.3s;
+}
+
+#add-course {
+  background-color: #3498db;
+  color: white;
+}
+
+#add-course:hover {
+  background-color: #2980b9;
+}
+
+#clear-data {
+  background-color: #f39c12;
+  color: white;
+}
+
+#clear-data:hover {
+  background-color: #d68910;
+}
+
+button[type="submit"] {
+  background-color: #2ecc71;
+  color: white;
+}
+
+button[type="submit"]:hover {
+  background-color: #27ae60;
 }
 
 #result {
   margin-top: 20px;
-  font-size: 20px;
-  text-align: center;
+  font-size: 18px;
   font-weight: bold;
-  color: #004d40;
+  color: #34495e;
+  text-align: center;
 }
