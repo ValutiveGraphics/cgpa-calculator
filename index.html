@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Value Graphics Smart CGPA Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart CGPA Calculator</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>🎓 Value Graphics Smart CGPA Calculator</h1>
+    <h1>🎓 Smart CGPA Calculator</h1>
 
     <form id="cgpa-form">
+      <label for="semester-select">Select Semester:</label>
       <select id="semester-select">
         <option value="Semester 1">Semester 1</option>
         <option value="Semester 2">Semester 2</option>
@@ -18,11 +19,13 @@
 
       <div id="course-inputs"></div>
 
-      <button type="button" id="add-course">Add Course</button>
-      <button type="submit">Calculate CGPA</button>
+      <div class="button-group">
+        <button type="button" id="add-course">Add Course</button>
+        <button type="submit">Calculate CGPA</button>
+        <button type="button" id="clear-data">Clear All Data</button>
+      </div>
     </form>
 
-    <button id="clear-data">Clear All Data</button>
     <div id="result"></div>
   </div>
 
@@ -35,7 +38,6 @@
       const semesterSelect = document.getElementById('semester-select');
       const clearDataBtn = document.getElementById('clear-data');
 
-      // Save session to localStorage
       function saveSession() {
         const data = Array.from(document.querySelectorAll('.course-row')).map(row => ({
           code: row.querySelector('.course-code').value,
@@ -46,7 +48,6 @@
         localStorage.setItem('cgpa-data', JSON.stringify({ semester, data }));
       }
 
-      // Load session from localStorage
       function loadSession() {
         const stored = localStorage.getItem('cgpa-data');
         if (stored) {
@@ -58,7 +59,6 @@
         }
       }
 
-      // Clear localStorage
       clearDataBtn.addEventListener('click', () => {
         localStorage.removeItem('cgpa-data');
         courseInputs.innerHTML = '';
@@ -66,7 +66,6 @@
         createCourseRow();
       });
 
-      // Function to create a new course input row
       function createCourseRow(code = '', grade = '', units = '') {
         const row = document.createElement('div');
         row.className = 'course-row';
@@ -82,7 +81,7 @@
             <option value="0" ${grade === '0' ? 'selected' : ''}>F</option>
           </select>
           <input type="number" placeholder="Units" class="units" min="1" max="6" value="${units}" required />
-          <button type="button" class="delete-course">Remove Course</button>
+          <button type="button" class="delete-course">Remove</button>
         `;
 
         row.querySelector('.delete-course').addEventListener('click', () => {
@@ -93,15 +92,12 @@
         courseInputs.appendChild(row);
       }
 
-      // Add new course row on button click
       addCourseBtn.addEventListener('click', () => {
         createCourseRow();
       });
 
-      // Handle form submission
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-
         const rows = document.querySelectorAll('.course-row');
         let totalPoints = 0;
         let totalUnits = 0;
@@ -120,7 +116,7 @@
           resultDiv.textContent = 'Please enter valid courses and units.';
         } else {
           const cgpa = (totalPoints / totalUnits).toFixed(2);
-          resultDiv.innerHTML = `<h2>${semesterSelect.value}: Your CGPA is: ${cgpa}</h2>`;
+          resultDiv.innerHTML = `<h2>${semesterSelect.value}: Your CGPA is: <strong>${cgpa}</strong></h2>`;
         }
 
         saveSession();
