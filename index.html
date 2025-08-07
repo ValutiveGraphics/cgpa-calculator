@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart CGPA Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 Smart CGPA Calculator</h1>
+
+    <form id="cgpa-form">
+      <div id="course-inputs">
+        <div class="course-row">
+          <input type="text" placeholder="Course Code (e.g. MTH101)" class="course-code" required />
+          <select class="grade" required>
+            <option value="">Grade</option>
+            <option value="5">A</option>
+            <option value="4">B</option>
+            <option value="3">C</option>
+            <option value="2">D</option>
+            <option value="1">E</option>
+            <option value="0">F</option>
+          </select>
+          <input type="number" placeholder="Units" class="units" min="1" max="6" required />
+        </div>
+      </div>
+
+      <button type="button" id="add-course">➕ Add Course</button>
+      <button type="submit">Calculate CGPA</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
