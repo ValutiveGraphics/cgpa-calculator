@@ -11,12 +11,18 @@
     <h1>🎓 Smart CGPA Calculator</h1>
 
     <form id="cgpa-form">
+      <select id="semester-select">
+        <option value="Semester 1">Semester 1</option>
+        <option value="Semester 2">Semester 2</option>
+      </select>
+
       <div id="course-inputs"></div>
 
-      <button type="button" id="add-course">➕ Add Course</button>
+      <button type="button" id="add-course">Add Course</button>
       <button type="submit">Calculate CGPA</button>
     </form>
 
+    <button id="clear-data">Clear All Data</button>
     <div id="result"></div>
   </div>
 
@@ -26,39 +32,71 @@
       const addCourseBtn = document.getElementById('add-course');
       const form = document.getElementById('cgpa-form');
       const resultDiv = document.getElementById('result');
+      const semesterSelect = document.getElementById('semester-select');
+      const clearDataBtn = document.getElementById('clear-data');
+
+      // Save session to localStorage
+      function saveSession() {
+        const data = Array.from(document.querySelectorAll('.course-row')).map(row => ({
+          code: row.querySelector('.course-code').value,
+          grade: row.querySelector('.grade').value,
+          units: row.querySelector('.units').value
+        }));
+        const semester = semesterSelect.value;
+        localStorage.setItem('cgpa-data', JSON.stringify({ semester, data }));
+      }
+
+      // Load session from localStorage
+      function loadSession() {
+        const stored = localStorage.getItem('cgpa-data');
+        if (stored) {
+          const { semester, data } = JSON.parse(stored);
+          semesterSelect.value = semester;
+          data.forEach(item => createCourseRow(item.code, item.grade, item.units));
+        } else {
+          createCourseRow();
+        }
+      }
+
+      // Clear localStorage
+      clearDataBtn.addEventListener('click', () => {
+        localStorage.removeItem('cgpa-data');
+        courseInputs.innerHTML = '';
+        resultDiv.innerHTML = '';
+        createCourseRow();
+      });
 
       // Function to create a new course input row
-      function createCourseRow() {
+      function createCourseRow(code = '', grade = '', units = '') {
         const row = document.createElement('div');
         row.className = 'course-row';
         row.innerHTML = `
-          <input type="text" placeholder="Course Code (e.g. MTH101)" class="course-code" required />
+          <input type="text" placeholder="Course Code (e.g. MTH101)" class="course-code" value="${code}" required />
           <select class="grade" required>
             <option value="">Grade</option>
-            <option value="5">A</option>
-            <option value="4">B</option>
-            <option value="3">C</option>
-            <option value="2">D</option>
-            <option value="1">E</option>
-            <option value="0">F</option>
+            <option value="5" ${grade === '5' ? 'selected' : ''}>A</option>
+            <option value="4" ${grade === '4' ? 'selected' : ''}>B</option>
+            <option value="3" ${grade === '3' ? 'selected' : ''}>C</option>
+            <option value="2" ${grade === '2' ? 'selected' : ''}>D</option>
+            <option value="1" ${grade === '1' ? 'selected' : ''}>E</option>
+            <option value="0" ${grade === '0' ? 'selected' : ''}>F</option>
           </select>
-          <input type="number" placeholder="Units" class="units" min="1" max="6" required />
-          <button type="button" class="delete-btn">❌</button>
+          <input type="number" placeholder="Units" class="units" min="1" max="6" value="${units}" required />
+          <button type="button" class="delete-course">Remove Course</button>
         `;
 
-        // Add delete functionality
-        row.querySelector('.delete-btn').addEventListener('click', () => {
+        row.querySelector('.delete-course').addEventListener('click', () => {
           row.remove();
+          saveSession();
         });
 
         courseInputs.appendChild(row);
       }
 
-      // Add first row on load
-      createCourseRow();
-
       // Add new course row on button click
-      addCourseBtn.addEventListener('click', createCourseRow);
+      addCourseBtn.addEventListener('click', () => {
+        createCourseRow();
+      });
 
       // Handle form submission
       form.addEventListener('submit', function (e) {
@@ -82,9 +120,13 @@
           resultDiv.textContent = 'Please enter valid courses and units.';
         } else {
           const cgpa = (totalPoints / totalUnits).toFixed(2);
-          resultDiv.innerHTML = `<h2>Your CGPA is: ${cgpa}</h2>`;
+          resultDiv.innerHTML = `<h2>${semesterSelect.value}: Your CGPA is: ${cgpa}</h2>`;
         }
+
+        saveSession();
       });
+
+      loadSession();
     });
   </script>
 </body>
