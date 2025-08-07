@@ -5,6 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CGPA Calculator</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Basic modal styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+    }
+    .modal-content h3 {
+      margin-top: 0;
+    }
+    .grade-row {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .grade-row input {
+      flex: 1;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -15,7 +45,6 @@
       <button id="dark-mode" class="toggle-off">Dark Mode</button>
     </div>
 
-    <!-- NEW: Grading scale selector -->
     <div style="margin-bottom: 10px;">
       <label for="grade-scale">Grading Scale:</label>
       <select id="grade-scale">
@@ -41,6 +70,18 @@
     <div class="result" id="result">Your CGPA will appear here.</div>
   </div>
 
+  <!-- Custom scale modal -->
+  <div class="modal" id="custom-scale-modal">
+    <div class="modal-content">
+      <h3>Custom Grading Scale</h3>
+      <div id="custom-grade-list">
+        <!-- Grade inputs will go here -->
+      </div>
+      <button id="add-grade">Add Grade</button>
+      <button id="save-custom-scale">Save</button>
+    </div>
+  </div>
+
   <script>
     const addCourseBtn = document.getElementById('add-course');
     const clearDataBtn = document.getElementById('clear-data');
@@ -54,9 +95,14 @@
     const progressFill = document.getElementById('progress-fill');
     const gradeScaleSelector = document.getElementById('grade-scale');
 
+    const customModal = document.getElementById('custom-scale-modal');
+    const customGradeList = document.getElementById('custom-grade-list');
+    const addGradeBtn = document.getElementById('add-grade');
+    const saveCustomBtn = document.getElementById('save-custom-scale');
+
     let currentScale = '5';
 
-    const gradeOptions = {
+    let gradeOptions = {
       '5': [
         { label: 'A', value: 5 },
         { label: 'B', value: 4 },
@@ -76,6 +122,8 @@
       ]
     };
 
+    let customGrades = [];
+
     function createGradeSelect(selected = '') {
       const select = document.createElement('select');
       select.className = 'grade';
@@ -86,7 +134,7 @@
       defaultOption.textContent = 'Grade';
       select.appendChild(defaultOption);
 
-      const options = gradeOptions[currentScale] || [];
+      const options = currentScale === 'custom' ? customGrades : gradeOptions[currentScale] || [];
       options.forEach(opt => {
         const option = document.createElement('option');
         option.value = opt.value;
@@ -159,23 +207,26 @@
         }
       });
 
+      const maxScale = currentScale === 'custom' ? Math.max(...customGrades.map(g => g.value), 1) : (currentScale === '4' ? 4 : 5);
       const cgpa = totalUnits ? (totalPoints / totalUnits).toFixed(2) : 0;
       result.textContent = `Your CGPA is ${cgpa}`;
-      progressFill.style.width = `${(cgpa / (currentScale === '4' ? 4 : 5)) * 100}%`;
+      progressFill.style.width = `${(cgpa / maxScale) * 100}%`;
     }
 
     function clearData() {
-      courseInputs.innerHTML = '';
-      localStorage.removeItem('cgpaData');
-      result.textContent = 'Your CGPA will appear here.';
-      progressFill.style.width = '0';
+      if(confirm("Are you sure you want to clear all data?")) {
+        courseInputs.innerHTML = '';
+        localStorage.removeItem('cgpaData');
+        result.textContent = 'Your CGPA will appear here.';
+        progressFill.style.width = '0';
+      }
     }
 
     function exportToCSV() {
       let csv = 'Course Code,Grade,Units\n';
       document.querySelectorAll('.course-row').forEach(row => {
         const code = row.querySelector('.course-code').value;
-        const grade = row.querySelector('.grade').value;
+        const grade = row.querySelector('.grade option:checked').textContent;
         const units = row.querySelector('.units').value;
         csv += `${code},${grade},${units}\n`;
       });
@@ -188,9 +239,13 @@
     }
 
     function saveSession() {
-      const data = [];
+      const data = {
+        scale: currentScale,
+        customGrades,
+        courses: []
+      };
       document.querySelectorAll('.course-row').forEach(row => {
-        data.push({
+        data.courses.push({
           code: row.querySelector('.course-code').value,
           grade: row.querySelector('.grade').value,
           units: row.querySelector('.units').value
@@ -200,14 +255,53 @@
     }
 
     function restoreSession() {
-      const saved = JSON.parse(localStorage.getItem('cgpaData') || '[]');
-      saved.forEach(d => createCourseRow(d.code, d.grade, d.units));
+      const saved = JSON.parse(localStorage.getItem('cgpaData') || '{}');
+      if(saved.scale) currentScale = saved.scale;
+      if(saved.customGrades) customGrades = saved.customGrades;
+      if(currentScale === 'custom') gradeScaleSelector.value = 'custom';
+      saved.courses?.forEach(d => createCourseRow(d.code, d.grade, d.units));
     }
 
     function toggleMode(mode) {
       document.body.classList.toggle('dark-mode', mode === 'dark');
     }
 
+    // Custom scale modal handlers
+    function openCustomModal() {
+      customGradeList.innerHTML = '';
+      customGrades.forEach(g => addCustomGradeRow(g.label, g.value));
+      if(customGrades.length === 0) addCustomGradeRow();
+      customModal.style.display = 'flex';
+    }
+
+    function addCustomGradeRow(label = '', value = '') {
+      const row = document.createElement('div');
+      row.className = 'grade-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Grade" value="${label}">
+        <input type="number" placeholder="Value" step="0.1" value="${value}">
+      `;
+      customGradeList.appendChild(row);
+    }
+
+    addGradeBtn.addEventListener('click', () => addCustomGradeRow());
+
+    saveCustomBtn.addEventListener('click', () => {
+      customGrades = [];
+      document.querySelectorAll('#custom-grade-list .grade-row').forEach(r => {
+        const label = r.children[0].value.trim();
+        const val = parseFloat(r.children[1].value);
+        if(label && !isNaN(val)) {
+          customGrades.push({ label, value: val });
+        }
+      });
+      customModal.style.display = 'none';
+      courseInputs.innerHTML = '';
+      createCourseRow();
+      saveSession();
+    });
+
+    // Event listeners
     lightModeBtn.addEventListener('click', () => toggleMode('light'));
     darkModeBtn.addEventListener('click', () => toggleMode('dark'));
     addCourseBtn.addEventListener('click', () => createCourseRow());
@@ -218,8 +312,12 @@
 
     gradeScaleSelector.addEventListener('change', () => {
       currentScale = gradeScaleSelector.value;
-      courseInputs.innerHTML = '';
-      createCourseRow(); // Start fresh for new scale
+      if(currentScale === 'custom') {
+        openCustomModal();
+      } else {
+        courseInputs.innerHTML = '';
+        createCourseRow();
+      }
       saveSession();
     });
 
