@@ -1,213 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Value Graphics CGPA Calculator</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
-
-    body.dark-mode {
-      background-color: #121212;
-      color: #fff;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    body.dark-mode .container {
-      background-color: #1e1e1e;
-      color: white;
-    }
-
-    h1 {
-      text-align: center;
-      color: #007bff;
-    }
-
-    .mode-toggle {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    form {
-      margin-top: 20px;
-    }
-
-    .course-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    input, select {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      flex: 1;
-      min-width: 120px;
-    }
-
-    /* Buttons */
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    #add-course {
-      background-color: #6c757d; /* gray */
-      color: #fff;
-    }
-
-    #add-course:hover {
-      background-color: #5a6268;
-    }
-
-    #cgpa-form button[type="submit"] {
-      background-color: #007bff; /* blue */
-      color: #fff;
-    }
-
-    #cgpa-form button[type="submit"]:hover {
-      background-color: #0056b3;
-    }
-
-    #clear-data {
-      background-color: #dc3545; /* red */
-      color: white;
-    }
-
-    #clear-data:hover {
-      background-color: #b52b37;
-    }
-
-    #export-csv {
-      background-color: #28a745; /* green */
-      color: white;
-    }
-
-    #export-csv:hover {
-      background-color: #218838;
-    }
-
-    #print-report {
-      background-color: #17a2b8; /* teal */
-      color: white;
-    }
-
-    #print-report:hover {
-      background-color: #138496;
-    }
-
-    .delete-course {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    .delete-course:hover {
-      background-color: #a71d2a;
-    }
-
-    #light-mode-btn {
-      background-color: #f0f0f0;
-      color: #333;
-    }
-
-    #light-mode-btn:hover {
-      background-color: #e0e0e0;
-    }
-
-    #dark-mode-btn {
-      background-color: #343a40;
-      color: white;
-    }
-
-    #dark-mode-btn:hover {
-      background-color: #1d2124;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 20px;
-      background: #eee;
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 20px 0;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0;
-      background: linear-gradient(to right, #28a745, #007bff);
-      transition: width 0.5s ease-in-out;
-    }
-
-    @media (max-width: 600px) {
-      .course-row {
-        flex-direction: column;
-      }
-
-      .mode-toggle {
-        flex-direction: column;
-        align-items: flex-end;
-      }
-    }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CGPA Calculator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>🎓 Value Graphics CGPA Calculator</h1>
+    <h1>CGPA Calculator</h1>
 
-    <div class="mode-toggle">
-      <button id="light-mode-btn">Light Mode</button>
-      <button id="dark-mode-btn">Dark Mode</button>
+    <div class="toggle-btn-group">
+      <button id="light-mode" class="toggle-on">Light Mode</button>
+      <button id="dark-mode" class="toggle-off">Dark Mode</button>
     </div>
 
     <form id="cgpa-form">
-      <select id="semester-select">
-        <option value="Semester 1">Semester 1</option>
-        <option value="Semester 2">Semester 2</option>
-      </select>
-
       <div id="course-inputs"></div>
-
       <button type="button" id="add-course">Add Course</button>
-      <button type="submit">Calculate CGPA</button>
+      <button type="button" id="calculate">Calculate CGPA</button>
+      <button type="button" id="export-csv">Export to CSV</button>
+      <button type="button" id="print-report">Print Report</button>
+      <button type="button" id="clear-data">Clear All Data</button>
     </form>
 
     <div class="progress-bar">
-      <div class="progress-fill"></div>
+      <div class="progress-fill" id="progress-fill"></div>
     </div>
 
-    <button id="clear-data">Clear All Data</button>
-    <button id="export-csv">Export to CSV</button>
-    <button id="print-report">Print Report</button>
-
-    <div id="result"></div>
-
-    <div id="chart-container">
-      <canvas id="cgpa-chart" width="400" height="200"></canvas>
-    </div>
+    <div class="result" id="result">Your CGPA will appear here.</div>
   </div>
 
-  <!-- You can include your script.js file or inline JS here -->
+  <script>
+    const addCourseBtn = document.getElementById('add-course');
+    const clearDataBtn = document.getElementById('clear-data');
+    const exportCsvBtn = document.getElementById('export-csv');
+    const printReportBtn = document.getElementById('print-report');
+    const calculateBtn = document.getElementById('calculate');
+    const lightModeBtn = document.getElementById('light-mode');
+    const darkModeBtn = document.getElementById('dark-mode');
+    const courseInputs = document.getElementById('course-inputs');
+    const result = document.getElementById('result');
+    const progressFill = document.getElementById('progress-fill');
+
+    function createCourseRow(code = '', grade = '', units = '') {
+      const row = document.createElement('div');
+      row.className = 'course-row';
+      row.innerHTML = `
+        <input type="text" placeholder="Course Code" class="course-code" value="${code}" required />
+        <select class="grade" required>
+          <option value="">Grade</option>
+          <option value="5" ${grade === '5' ? 'selected' : ''}>A</option>
+          <option value="4" ${grade === '4' ? 'selected' : ''}>B</option>
+          <option value="3" ${grade === '3' ? 'selected' : ''}>C</option>
+          <option value="2" ${grade === '2' ? 'selected' : ''}>D</option>
+          <option value="1" ${grade === '1' ? 'selected' : ''}>E</option>
+          <option value="0" ${grade === '0' ? 'selected' : ''}>F</option>
+        </select>
+        <input type="number" placeholder="Units" class="units" min="1" max="6" value="${units}" required />
+        <button type="button" class="delete-course">Remove</button>
+      `;
+
+      row.querySelector('.delete-course').onclick = () => {
+        row.remove();
+        saveSession();
+        calculateCGPA();
+      };
+
+      ['input', 'change'].forEach(evt => {
+        row.addEventListener(evt, () => {
+          calculateCGPA();
+        });
+      });
+
+      courseInputs.appendChild(row);
+    }
+
+    function calculateCGPA() {
+      const grades = document.querySelectorAll('.grade');
+      const units = document.querySelectorAll('.units');
+      let totalPoints = 0;
+      let totalUnits = 0;
+
+      grades.forEach((grade, i) => {
+        const g = parseFloat(grade.value);
+        const u = parseFloat(units[i].value);
+        if (!isNaN(g) && !isNaN(u)) {
+          totalPoints += g * u;
+          totalUnits += u;
+        }
+      });
+
+      const cgpa = totalUnits ? (totalPoints / totalUnits).toFixed(2) : 0;
+      result.textContent = `Your CGPA is ${cgpa}`;
+      progressFill.style.width = `${(cgpa / 5) * 100}%`;
+    }
+
+    function clearData() {
+      courseInputs.innerHTML = '';
+      localStorage.removeItem('cgpaData');
+      result.textContent = 'Your CGPA will appear here.';
+      progressFill.style.width = '0';
+    }
+
+    function exportToCSV() {
+      let csv = 'Course Code,Grade,Units\n';
+      document.querySelectorAll('.course-row').forEach(row => {
+        const code = row.querySelector('.course-code').value;
+        const grade = row.querySelector('.grade').value;
+        const units = row.querySelector('.units').value;
+        csv += `${code},${grade},${units}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'cgpa_data.csv';
+      link.click();
+    }
+
+    function saveSession() {
+      const data = [];
+      document.querySelectorAll('.course-row').forEach(row => {
+        data.push({
+          code: row.querySelector('.course-code').value,
+          grade: row.querySelector('.grade').value,
+          units: row.querySelector('.units').value
+        });
+      });
+      localStorage.setItem('cgpaData', JSON.stringify(data));
+    }
+
+    function restoreSession() {
+      const saved = JSON.parse(localStorage.getItem('cgpaData') || '[]');
+      saved.forEach(d => createCourseRow(d.code, d.grade, d.units));
+    }
+
+    function toggleMode(mode) {
+      document.body.classList.toggle('dark-mode', mode === 'dark');
+    }
+
+    lightModeBtn.addEventListener('click', () => toggleMode('light'));
+    darkModeBtn.addEventListener('click', () => toggleMode('dark'));
+    addCourseBtn.addEventListener('click', () => createCourseRow());
+    clearDataBtn.addEventListener('click', () => clearData());
+    exportCsvBtn.addEventListener('click', () => exportToCSV());
+    printReportBtn.addEventListener('click', () => window.print());
+    calculateBtn.addEventListener('click', () => calculateCGPA());
+
+    // Init
+    restoreSession();
+    createCourseRow();
+  </script>
 </body>
 </html>
