@@ -1,16 +1,14 @@
-// script.js
+document.addEventListener('DOMContentLoaded', () => {
+  const courseInputs = document.getElementById('course-inputs');
+  const addCourseBtn = document.getElementById('add-course');
+  const form = document.getElementById('cgpa-form');
+  const resultDiv = document.getElementById('result');
 
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("cgpa-form");
-  const courseInputs = document.getElementById("course-inputs");
-  const result = document.getElementById("result");
-  const addCourseBtn = document.getElementById("add-course");
-
-  // Add new course input row
-  addCourseBtn.addEventListener("click", () => {
-    const newRow = document.createElement("div");
-    newRow.className = "course-row";
-    newRow.innerHTML = `
+  // Function to create a new course input row
+  function createCourseRow() {
+    const row = document.createElement('div');
+    row.className = 'course-row';
+    row.innerHTML = `
       <input type="text" placeholder="Course Code (e.g. MTH101)" class="course-code" required />
       <select class="grade" required>
         <option value="">Grade</option>
@@ -23,26 +21,38 @@ document.addEventListener("DOMContentLoaded", () => {
       </select>
       <input type="number" placeholder="Units" class="units" min="1" max="6" required />
     `;
-    courseInputs.appendChild(newRow);
-  });
+    courseInputs.appendChild(row);
+  }
 
-  // Handle CGPA calculation
-  form.addEventListener("submit", (e) => {
+  // Add first row on load
+  createCourseRow();
+
+  // Add new course row on button click
+  addCourseBtn.addEventListener('click', createCourseRow);
+
+  // Handle form submission
+  form.addEventListener('submit', function (e) {
     e.preventDefault();
-    let totalUnits = 0;
+
+    const rows = document.querySelectorAll('.course-row');
     let totalPoints = 0;
-    const rows = document.querySelectorAll(".course-row");
+    let totalUnits = 0;
 
     rows.forEach((row) => {
-      const grade = parseFloat(row.querySelector(".grade").value);
-      const units = parseFloat(row.querySelector(".units").value);
+      const grade = parseInt(row.querySelector('.grade').value);
+      const units = parseInt(row.querySelector('.units').value);
+
       if (!isNaN(grade) && !isNaN(units)) {
-        totalUnits += units;
         totalPoints += grade * units;
+        totalUnits += units;
       }
     });
 
-    const cgpa = totalUnits > 0 ? (totalPoints / totalUnits).toFixed(2) : 0;
-    result.innerHTML = `<h2>Your CGPA is: <span>${cgpa}</span></h2>`;
+    if (totalUnits === 0) {
+      resultDiv.textContent = 'Please enter valid courses and units.';
+    } else {
+      const cgpa = (totalPoints / totalUnits).toFixed(2);
+      resultDiv.innerHTML = `<h2>Your CGPA is: ${cgpa}</h2>`;
+    }
   });
 });
