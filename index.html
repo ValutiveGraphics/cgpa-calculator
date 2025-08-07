@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CGPA Calculator</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
@@ -13,6 +13,16 @@
     <div class="toggle-btn-group">
       <button id="light-mode" class="toggle-on">Light Mode</button>
       <button id="dark-mode" class="toggle-off">Dark Mode</button>
+    </div>
+
+    <!-- NEW: Grading scale selector -->
+    <div style="margin-bottom: 10px;">
+      <label for="grade-scale">Grading Scale:</label>
+      <select id="grade-scale">
+        <option value="5" selected>5-Point Scale (A=5)</option>
+        <option value="4">4-Point Scale (A=4)</option>
+        <option value="custom">Custom Scale</option>
+      </select>
     </div>
 
     <form id="cgpa-form">
@@ -42,34 +52,92 @@
     const courseInputs = document.getElementById('course-inputs');
     const result = document.getElementById('result');
     const progressFill = document.getElementById('progress-fill');
+    const gradeScaleSelector = document.getElementById('grade-scale');
+
+    let currentScale = '5';
+
+    const gradeOptions = {
+      '5': [
+        { label: 'A', value: 5 },
+        { label: 'B', value: 4 },
+        { label: 'C', value: 3 },
+        { label: 'D', value: 2 },
+        { label: 'E', value: 1 },
+        { label: 'F', value: 0 },
+      ],
+      '4': [
+        { label: 'A', value: 4 },
+        { label: 'B+', value: 3.5 },
+        { label: 'B', value: 3 },
+        { label: 'C+', value: 2.5 },
+        { label: 'C', value: 2 },
+        { label: 'D', value: 1 },
+        { label: 'F', value: 0 },
+      ]
+    };
+
+    function createGradeSelect(selected = '') {
+      const select = document.createElement('select');
+      select.className = 'grade';
+      select.required = true;
+
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = 'Grade';
+      select.appendChild(defaultOption);
+
+      const options = gradeOptions[currentScale] || [];
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.label;
+        if (opt.value == selected) option.selected = true;
+        select.appendChild(option);
+      });
+
+      return select;
+    }
 
     function createCourseRow(code = '', grade = '', units = '') {
       const row = document.createElement('div');
       row.className = 'course-row';
-      row.innerHTML = `
-        <input type="text" placeholder="Course Code" class="course-code" value="${code}" required />
-        <select class="grade" required>
-          <option value="">Grade</option>
-          <option value="5" ${grade === '5' ? 'selected' : ''}>A</option>
-          <option value="4" ${grade === '4' ? 'selected' : ''}>B</option>
-          <option value="3" ${grade === '3' ? 'selected' : ''}>C</option>
-          <option value="2" ${grade === '2' ? 'selected' : ''}>D</option>
-          <option value="1" ${grade === '1' ? 'selected' : ''}>E</option>
-          <option value="0" ${grade === '0' ? 'selected' : ''}>F</option>
-        </select>
-        <input type="number" placeholder="Units" class="units" min="1" max="6" value="${units}" required />
-        <button type="button" class="delete-course">Remove</button>
-      `;
 
-      row.querySelector('.delete-course').onclick = () => {
+      const codeInput = document.createElement('input');
+      codeInput.type = 'text';
+      codeInput.placeholder = 'Course Code';
+      codeInput.className = 'course-code';
+      codeInput.value = code;
+
+      const gradeSelect = createGradeSelect(grade);
+
+      const unitInput = document.createElement('input');
+      unitInput.type = 'number';
+      unitInput.placeholder = 'Units';
+      unitInput.className = 'units';
+      unitInput.min = 1;
+      unitInput.max = 6;
+      unitInput.value = units;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.className = 'delete-course';
+      deleteBtn.textContent = 'Remove';
+      deleteBtn.onclick = () => {
         row.remove();
         saveSession();
         calculateCGPA();
       };
 
-      ['input', 'change'].forEach(evt => {
-        row.addEventListener(evt, () => {
+      row.append(codeInput, gradeSelect, unitInput, deleteBtn);
+
+      [codeInput, gradeSelect, unitInput].forEach(el => {
+        el.addEventListener('input', () => {
           calculateCGPA();
+          saveSession();
+        });
+        el.addEventListener('change', () => {
+          calculateCGPA();
+          saveSession();
         });
       });
 
@@ -93,7 +161,7 @@
 
       const cgpa = totalUnits ? (totalPoints / totalUnits).toFixed(2) : 0;
       result.textContent = `Your CGPA is ${cgpa}`;
-      progressFill.style.width = `${(cgpa / 5) * 100}%`;
+      progressFill.style.width = `${(cgpa / (currentScale === '4' ? 4 : 5)) * 100}%`;
     }
 
     function clearData() {
@@ -148,9 +216,16 @@
     printReportBtn.addEventListener('click', () => window.print());
     calculateBtn.addEventListener('click', () => calculateCGPA());
 
+    gradeScaleSelector.addEventListener('change', () => {
+      currentScale = gradeScaleSelector.value;
+      courseInputs.innerHTML = '';
+      createCourseRow(); // Start fresh for new scale
+      saveSession();
+    });
+
     // Init
     restoreSession();
-    createCourseRow();
+    if (!courseInputs.hasChildNodes()) createCourseRow();
   </script>
 </body>
 </html>
