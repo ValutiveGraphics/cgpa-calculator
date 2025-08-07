@@ -47,23 +47,57 @@ input, select, button {
   box-sizing: border-box;
 }
 
+/* Unified Button Style */
 button {
-  background-color: #007bff;
+  background-color: #0069d9;
   color: white;
+  font-weight: 500;
+  border: none;
+  transition: background-color 0.3s ease;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #0051b3;
 }
 
-button#add-course,
-button#clear-data,
+/* Primary buttons */
+button#add-course {
+  background-color: #28a745;
+}
+
+button#add-course:hover {
+  background-color: #218838;
+}
+
+button#clear-data {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+button#clear-data:hover {
+  background-color: #e0a800;
+}
+
 button#export-csv {
-  margin-top: 10px;
+  background-color: #17a2b8;
 }
 
+button#export-csv:hover {
+  background-color: #138496;
+}
+
+/* Delete Course Button */
+button.delete-course {
+  background-color: #dc3545;
+  color: white;
+}
+
+button.delete-course:hover {
+  background-color: #b52a38;
+}
+
+/* Course Row Layout */
 .course-row {
   display: flex;
   gap: 10px;
@@ -75,15 +109,6 @@ button#export-csv {
 .course-row input,
 .course-row select {
   flex: 1;
-}
-
-button.delete-course {
-  background-color: #dc3545;
-  color: white;
-}
-
-button.delete-course:hover {
-  background-color: #b52a38;
 }
 
 .progress-bar {
@@ -109,6 +134,7 @@ button.delete-course:hover {
   text-align: center;
 }
 
+/* Dark mode button group */
 .toggle-buttons {
   text-align: right;
   margin-top: -30px;
@@ -121,6 +147,21 @@ button.delete-course:hover {
   margin-bottom: 10px;
 }
 
+.toggle-btn-group button {
+  background-color: #6c757d;
+  color: #fff;
+}
+
+.toggle-btn-group button:hover {
+  background-color: #5a6268;
+}
+
+.dark-mode .toggle-btn-group button {
+  background-color: #999;
+  color: #000;
+}
+
+/* Responsive Layout */
 @media (max-width: 600px) {
   .course-row {
     flex-direction: column;
