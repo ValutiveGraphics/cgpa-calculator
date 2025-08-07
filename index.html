@@ -43,7 +43,14 @@
             <option value="0">F</option>
           </select>
           <input type="number" placeholder="Units" class="units" min="1" max="6" required />
+          <button type="button" class="delete-btn">❌</button>
         `;
+
+        // Add delete functionality
+        row.querySelector('.delete-btn').addEventListener('click', () => {
+          row.remove();
+        });
+
         courseInputs.appendChild(row);
       }
 
